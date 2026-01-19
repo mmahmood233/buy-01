@@ -5,6 +5,7 @@ import com.ecommerce.user.dto.LoginRequest;
 import com.ecommerce.user.dto.RegisterRequest;
 import com.ecommerce.user.dto.UpdateUserRequest;
 import com.ecommerce.user.dto.UserResponse;
+import com.ecommerce.user.event.UserEventProducer;
 import com.ecommerce.user.exception.InvalidCredentialsException;
 import com.ecommerce.user.exception.UserAlreadyExistsException;
 import com.ecommerce.user.exception.UserNotFoundException;
@@ -28,6 +29,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
+    private final UserEventProducer userEventProducer;
 
     public AuthResponse register(RegisterRequest request) {
         log.info("Registering user with email: {}", request.getEmail());
@@ -40,6 +42,12 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         log.info("User registered successfully with ID: {}", savedUser.getId());
+
+        userEventProducer.publishUserCreatedEvent(
+                savedUser.getId(), 
+                savedUser.getEmail(), 
+                savedUser.getRole().name()
+        );
 
         String token = generateTokenForUser(savedUser);
         return userMapper.toAuthResponse(savedUser, token);
@@ -94,6 +102,8 @@ public class UserService {
 
         User user = findUserById(userId);
         userRepository.delete(user);
+
+        userEventProducer.publishUserDeletedEvent(userId);
 
         log.info("User deleted successfully: {}", userId);
     }

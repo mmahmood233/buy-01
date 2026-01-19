@@ -1,6 +1,7 @@
 package com.ecommerce.media.service;
 
 import com.ecommerce.media.dto.MediaResponse;
+import com.ecommerce.media.event.MediaEventProducer;
 import com.ecommerce.media.exception.MediaNotFoundException;
 import com.ecommerce.media.mapper.MediaMapper;
 import com.ecommerce.media.model.Media;
@@ -23,6 +24,7 @@ public class MediaService {
     private final MediaMapper mediaMapper;
     private final FileStorageService fileStorageService;
     private final MediaValidationService mediaValidationService;
+    private final MediaEventProducer mediaEventProducer;
 
     public MediaResponse uploadMedia(MultipartFile file, String productId, String userId) {
         log.info("Uploading media for product: {} by user: {}", productId, userId);
@@ -35,6 +37,12 @@ public class MediaService {
         Media savedMedia = mediaRepository.save(media);
 
         log.info("Media uploaded successfully with ID: {}", savedMedia.getId());
+
+        mediaEventProducer.publishMediaUploadedEvent(
+                savedMedia.getId(),
+                savedMedia.getProductId(),
+                savedMedia.getImagePath()
+        );
 
         return mediaMapper.toMediaResponse(savedMedia);
     }
@@ -69,6 +77,8 @@ public class MediaService {
         
         fileStorageService.deleteFile(media.getFileName());
         mediaRepository.delete(media);
+
+        mediaEventProducer.publishMediaDeletedEvent(mediaId, media.getProductId());
 
         log.info("Media deleted successfully: {}", mediaId);
     }

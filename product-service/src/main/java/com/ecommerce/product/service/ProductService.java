@@ -3,6 +3,7 @@ package com.ecommerce.product.service;
 import com.ecommerce.product.dto.CreateProductRequest;
 import com.ecommerce.product.dto.ProductResponse;
 import com.ecommerce.product.dto.UpdateProductRequest;
+import com.ecommerce.product.event.ProductEventProducer;
 import com.ecommerce.product.exception.InvalidRoleException;
 import com.ecommerce.product.exception.ProductNotFoundException;
 import com.ecommerce.product.exception.UnauthorizedAccessException;
@@ -24,6 +25,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final ProductEventProducer productEventProducer;
 
     public ProductResponse createProduct(CreateProductRequest request, String userId, String userRole) {
         log.info("Creating product for user: {}", userId);
@@ -34,6 +36,12 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         log.info("Product created successfully with ID: {}", savedProduct.getId());
+
+        productEventProducer.publishProductCreatedEvent(
+                savedProduct.getId(),
+                savedProduct.getUserId(),
+                savedProduct.getName()
+        );
 
         return productMapper.toProductResponse(savedProduct);
     }
@@ -86,6 +94,8 @@ public class ProductService {
         validateProductOwnership(product, userId);
 
         productRepository.delete(product);
+
+        productEventProducer.publishProductDeletedEvent(productId, userId);
 
         log.info("Product deleted successfully: {}", productId);
     }
