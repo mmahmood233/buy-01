@@ -4,6 +4,7 @@ import com.ecommerce.product.dto.CreateProductRequest;
 import com.ecommerce.product.dto.ProductResponse;
 import com.ecommerce.product.dto.UpdateProductRequest;
 import com.ecommerce.product.service.ProductService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,8 +23,9 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(
             @Valid @RequestBody CreateProductRequest request,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-User-Role") String userRole) {
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
+        String userRole = (String) httpRequest.getAttribute("X-User-Role");
         ProductResponse response = productService.createProduct(request, userId, userRole);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -50,8 +52,9 @@ public class ProductController {
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable String productId,
             @Valid @RequestBody UpdateProductRequest request,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-User-Role") String userRole) {
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
+        String userRole = (String) httpRequest.getAttribute("X-User-Role");
         ProductResponse response = productService.updateProduct(productId, request, userId, userRole);
         return ResponseEntity.ok(response);
     }
@@ -59,8 +62,9 @@ public class ProductController {
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deleteProduct(
             @PathVariable String productId,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-User-Role") String userRole) {
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
+        String userRole = (String) httpRequest.getAttribute("X-User-Role");
         productService.deleteProduct(productId, userId, userRole);
         return ResponseEntity.noContent().build();
     }
@@ -69,7 +73,8 @@ public class ProductController {
     public ResponseEntity<Void> addImageToProduct(
             @PathVariable String productId,
             @PathVariable String imageId,
-            @RequestHeader("X-User-Id") String userId) {
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
         productService.addImageToProduct(productId, imageId, userId);
         return ResponseEntity.ok().build();
     }
@@ -78,7 +83,8 @@ public class ProductController {
     public ResponseEntity<Void> removeImageFromProduct(
             @PathVariable String productId,
             @PathVariable String imageId,
-            @RequestHeader("X-User-Id") String userId) {
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
         productService.removeImageFromProduct(productId, imageId, userId);
         return ResponseEntity.noContent().build();
     }

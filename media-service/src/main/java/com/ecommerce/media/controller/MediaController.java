@@ -2,6 +2,7 @@ package com.ecommerce.media.controller;
 
 import com.ecommerce.media.dto.MediaResponse;
 import com.ecommerce.media.service.MediaService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,8 @@ public class MediaController {
     public ResponseEntity<MediaResponse> uploadMedia(
             @RequestParam("file") MultipartFile file,
             @RequestParam("productId") String productId,
-            @RequestHeader("X-User-Id") String userId) {
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
         MediaResponse response = mediaService.uploadMedia(file, productId, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -47,7 +49,8 @@ public class MediaController {
     @DeleteMapping("/{mediaId}")
     public ResponseEntity<Void> deleteMedia(
             @PathVariable String mediaId,
-            @RequestHeader("X-User-Id") String userId) {
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
         mediaService.deleteMedia(mediaId, userId);
         return ResponseEntity.noContent().build();
     }
