@@ -1,4 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost'
+  userServiceUrl: 'http://localhost:8081',
+  productServiceUrl: 'http://localhost:8082',
+  mediaServiceUrl: 'http://localhost:8083'
 };

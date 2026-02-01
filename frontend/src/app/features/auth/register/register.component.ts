@@ -135,11 +135,16 @@ export class RegisterComponent {
       this.errorMessage = '';
 
       this.authService.register(this.registerForm.value).subscribe({
-        next: () => {
+        next: (response) => {
+          console.log('Registration successful:', response);
           this.router.navigate(['/products']);
         },
         error: (error) => {
-          this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
+          console.error('Registration error:', error);
+          this.errorMessage = error.error?.message || error.message || 'Registration failed. Please try again.';
+          this.loading = false;
+        },
+        complete: () => {
           this.loading = false;
         }
       });

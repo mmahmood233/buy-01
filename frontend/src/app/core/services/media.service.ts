@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class MediaService {
-  private readonly API_URL = `${environment.apiUrl}/media-service/api/media`;
+  private readonly API_URL = `${environment.mediaServiceUrl}/api/media`;
 
   constructor(private http: HttpClient) {}
 
